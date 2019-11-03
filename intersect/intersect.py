@@ -3,8 +3,6 @@ from __future__ import print_function, division
 import maya.cmds as cmds
 import re
 
-# from utils import *
-
 class Component:
     def __init__(self, name, x, y, z):
         self.name = name
@@ -72,6 +70,7 @@ def point_in_curve(pt1, curve_points, max_x=999):
         return False
     return True
 
+# For now, ground plane must start at y=0
 def get_intersection(ground, obj):
     intersection_points = []
     edge_name = cut_at_y(obj, 0)
@@ -83,6 +82,24 @@ def get_intersection(ground, obj):
         if point_in_curve(face, curve_points):
             intersection_points.append(face.name)
     return intersection_points
-    
-intersection_points = get_intersection("pPlane1", "pCube1")
-cmds.select(*intersection_points)
+
+
+def imprint(ground, obj, step_distance=1):
+    obj_start_pos = get_position(obj)
+    _, bbox_y, _ = cmds.polyEvaluate([obj], b=True)
+    cmds.move(0, bbox_y[0], 0, "{}.scalePivot".format(obj), "{}.rotatePivot".format(obj), r=True, a=True)
+    cmds.move(0, 0, 0, [obj], a=True, ws=True, rpr=True)
+    obj_new_pos = get_position(obj)
+    num_steps = abs(int((obj_start_pos[1] - obj_new_pos[1]) // step_distance))
+    for i in range(num_steps):
+        cmds.move(0, -1, 0, [obj], r=True, os=True, wd=True)
+        intersection_points = get_intersection(ground, obj)
+        _, bbox_ground_y, _ = cmds.polyEvaluate(ground, b=True)
+        _, bbox_obj_y, _ = cmds.polyEvaluate(obj, b=True)
+        diff = bbox_obj_y[0] - bbox_ground_y[0]
+        cmds.select(*intersection_points)
+        cmds.polyMoveFacet(ty=diff)
+
+ground = "pPlane1"
+obj = "pSphere1"
+imprint(ground, obj)

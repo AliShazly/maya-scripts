@@ -1,12 +1,12 @@
 import maya.cmds as cmds
 import math
 
-def allign(face1, face2, local_y_flip=False):
+def allign(vtx1, vtx2, local_y_flip=False):
     
     # Matching rotation of face normal
     obj_name = face1.split(".")[0]
-    vec1 = format_polyinfo(cmds.polyInfo(face1, fn=True))
-    vec2 = format_polyinfo(cmds.polyInfo(face2, fn=True))
+    vec1 = cmds.polyNormalPerVertex(vtx1, query=True, xyz=True)[:3]
+    vec2 = cmds.polyNormalPerVertex(vtx2, query=True, xyz=True)[:3]
     rotation_matrix = get_rotation_matrix(vec1, vec2)
     euler_radians = rotation_matrix_to_euler(rotation_matrix)    
     r_x, r_y, r_z = [math.degrees(i) for i in euler_radians]
@@ -16,14 +16,14 @@ def allign(face1, face2, local_y_flip=False):
         cmds.scale(1, -1, 1, [obj_name], os=True, r=True)
     
     # Matching face position
-    f1_x, f1_y, f1_z = get_position(face1)
-    f2_x, f2_y, f2_z = get_position(face2)
-    cmds.move(f1_x, f1_y, f1_z, "{}.scalePivot".format(obj_name), "{}.rotatePivot".format(obj_name), rpr=True)
-    cmds.move(f2_x, f2_y, f2_z, [obj_name], rpr=True, ws=True)
+    v1_x, v1_y, v1_z = get_position(vtx1)
+    v2_x, v2_y, v2_z = get_position(vtx2)
+    cmds.move(v1_x, v1_y, v1_z, "{}.scalePivot".format(obj_name), "{}.rotatePivot".format(obj_name), rpr=True)
+    cmds.move(v2_x, v2_y, v2_z, [obj_name], rpr=True, ws=True)
     
 # Select first face
-face1 = cmds.ls(selection=True)[0]
+vtx1 = cmds.ls(selection=True)[0]
 # Select target face
-face2 = cmds.ls(selection=True)[0]
+vtx2 = cmds.ls(selection=True)[0]
 # Move
-allign(face1, face2, local_y_flip=False)
+allign(vtx1, vtx2, local_y_flip=False)

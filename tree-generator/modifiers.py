@@ -15,7 +15,7 @@ def random_flare(curve_range=(-0.5, 0)):
         startFlareX=f_v[0],
         endFlareX=f_v[1])
 
-def randomize_faces(obj_name=None, move_thresh=0.1, rotate_thresh=1, move_bias=None, rotate_bias=None):
+def randomize_faces(obj_name=None, move_thresh=0.1, rotate_thresh=1, move_bias=None, rotate_bias=None, component_space=False):
     
     if obj_name is None:
         obj_name = cmds.ls(selection=True)[0]
@@ -32,8 +32,12 @@ def randomize_faces(obj_name=None, move_thresh=0.1, rotate_thresh=1, move_bias=N
                rotate_coords = [c * b for c, b in zip(rotate_coords, rotate_bias)]
            if move_bias:
                move_coords = [c * b for c, b in zip(move_coords, move_bias)]
-           cmds.rotate(*rotate_coords, r=True)
-           cmds.move(*move_coords, r=True)
+           if component_space:
+               cmds.rotate(*rotate_coords, r=True, cs=True)
+               cmds.move(*move_coords, r=True, cs=True)
+           else:
+               cmds.rotate(*rotate_coords, r=True)
+               cmds.move(*move_coords, r=True)
 
     # Harden edges
     cmds.select(obj_name, r=True)

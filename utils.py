@@ -34,10 +34,13 @@ def format_polyinfo(polyinfo_output, flt=True):
     return out[0]
 
 
-def get_position(obj_name=None):
+def get_position(obj_name=None, object_space=False):
     if obj_name is not None:
         cmds.select(obj_name, r=True)
-    pos = cmds.xform(obj_name, q=True, translation=True, worldSpace=True)
+    if object_space:
+        pos = cmds.xform(obj_name, q=True, translation=True, os=True)
+    else:
+        pos = cmds.xform(obj_name, q=True, translation=True, worldSpace=True)
     if len(pos) > 3:
         # Splitting into sublists and averaging to find the center
         pos = [pos[i:i + 3] for i in range(0, len(pos), 3)]
@@ -76,3 +79,4 @@ def string_to_component(string_component):
 def clear():
     cmds.select(all=True)
     cmds.Delete()
+    

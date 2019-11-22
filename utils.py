@@ -3,6 +3,7 @@ from __future__ import division
 import maya.cmds as cmds
 import string
 import re
+import math
 
 class Component:
     def __init__(self, name, x, y, z):
@@ -10,7 +11,7 @@ class Component:
         self.x = x
         self.y = y
         self.z = z
-        
+
     def __repr__(self):
         if self.name:
             return "{}: (x: {}, y: {}, z: {})".format(self.name, self.x, selfa.y, self.z)
@@ -19,6 +20,7 @@ class Component:
     @property
     def id(self):
         return "".join(re.findall(r"\[(\d+)\]", self.name))
+
 
 def format_polyinfo(polyinfo_output, flt=True):
     out = []
@@ -48,7 +50,7 @@ def get_position(obj_name=None, object_space=False):
         pos_x = sum(pt[0] for pt in pos) / l
         pos_y = sum(pt[1] for pt in pos) / l
         pos_z = sum(pt[2] for pt in pos) / l
-        pos = [pos_x, pos_y, pos_z]        
+        pos = [pos_x, pos_y, pos_z]
     return [round(i, 5) for i in pos]
 
 
@@ -79,4 +81,15 @@ def string_to_component(string_component):
 def clear():
     cmds.select(all=True)
     cmds.Delete()
-    
+
+def cube_at_point(pos):
+    o, n = cmds.polyCube()
+    cmds.select(o)
+    cmds.move(*pos, a=True, ws=True)
+
+def distance_between(pos1, pos2):
+    p1 = np.array(pos1)
+    p2 = np.array(pos2)
+    squared_dist = np.sum((p1-p2)**2, axis=0)
+    return np.sqrt(squared_dist)
+

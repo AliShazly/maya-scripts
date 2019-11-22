@@ -3,8 +3,10 @@ import math
 
 def allign(vtx1, vtx2, local_y_flip=False):
     
+    assert "vtx" in vtx1 and "vtx" in vtx2
+    
     # Matching rotation of face normal
-    obj_name = face1.split(".")[0]
+    obj_name = vtx1.split(".")[0]
     vec1 = cmds.polyNormalPerVertex(vtx1, query=True, xyz=True)[:3]
     vec2 = cmds.polyNormalPerVertex(vtx2, query=True, xyz=True)[:3]
     rotation_matrix = get_rotation_matrix(vec1, vec2)
@@ -20,10 +22,4 @@ def allign(vtx1, vtx2, local_y_flip=False):
     v2_x, v2_y, v2_z = get_position(vtx2)
     cmds.move(v1_x, v1_y, v1_z, "{}.scalePivot".format(obj_name), "{}.rotatePivot".format(obj_name), rpr=True)
     cmds.move(v2_x, v2_y, v2_z, [obj_name], rpr=True, ws=True)
-    
-# Select first face
-vtx1 = cmds.ls(selection=True)[0]
-# Select target face
-vtx2 = cmds.ls(selection=True)[0]
-# Move
-allign(vtx1, vtx2, local_y_flip=False)
+

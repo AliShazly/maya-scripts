@@ -14,10 +14,7 @@ def allign_and_cache_weld_positions(vtx1, vtx2, reference_area=None, local_y_fli
     obj1 = vtx1.split(".")[0]
     obj2 = vtx2.split(".")[0]
     if reference_area:
-        cmds.select(faces2[0])
-        face_points = unpack_selection_items(cmds.polyListComponentConversion(tv=True, bo=True))
-        face_points = [get_position(i) for i in face_points]
-        area = poly_area(face_points)
+        area = cmds.polyEvaluate(faces2[0], wfa=True)[0]
         area_sqrt1 = math.sqrt(reference_area)
         area_sqrt2 = math.sqrt(area)
         ratio = area_sqrt2 / area_sqrt1
@@ -101,5 +98,5 @@ def allign_and_weld_multiple(dest_verts, origin_vert, reference_face_area, local
 
 dest_verts = unpack_selection_items(cmds.ls(selection=True))
 origin_vert = cmds.ls(selection=True)[0]
-reference_face_area = poly_area([get_position(i) for i in unpack_selection_items(cmds.polyListComponentConversion(cmds.ls(selection=True)[0], tv=True))])
+reference_face_area = cmds.polyEvaluate(cmds.ls(selection=True)[0], wfa=True)[0]
 allign_and_weld_multiple(dest_verts, origin_vert, reference_face_area, local_y_flip=True)

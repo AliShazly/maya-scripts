@@ -1,11 +1,12 @@
 from __future__ import division
 
-import maya.cmds as cmds
 import string
 import re
 import math
+import maya.cmds as cmds
 
 class Component:
+    """Basic struct for maya components"""
     def __init__(self, name, x, y, z):
         self.name = name
         self.x = x
@@ -23,6 +24,7 @@ class Component:
 
 
 def format_polyinfo(polyinfo_output, flt=True):
+    """Formats string output from cmds.polyInfo to usable data"""
     out = []
     for s in polyinfo_output:
         ascii_filtered = "".join([i for i in s if i not in string.ascii_letters])
@@ -36,7 +38,8 @@ def format_polyinfo(polyinfo_output, flt=True):
     return out[0]
 
 
-def get_position(obj_name=None, object_space=False):
+def get_position(obj_name=None, object_space=False, rounding=0):
+    """Returns the position of a specified object"""
     if obj_name is not None:
         cmds.select(obj_name, r=True)
     if object_space:
@@ -51,10 +54,16 @@ def get_position(obj_name=None, object_space=False):
         pos_y = sum(pt[1] for pt in pos) / l
         pos_z = sum(pt[2] for pt in pos) / l
         pos = [pos_x, pos_y, pos_z]
-    return [round(i, 5) for i in pos]
+    if rounding:
+        return [round(i, rounding) for i in pos]
+    return pos
 
 
 def unpack_selection_items(selection_items):
+    """Unpacks slice notation into seperate items
+    
+    ["pPlane1.vtx[50:52]"] -> ["pPlane1.vtx[50]", "pPlane1.vtx[51]", "pPlane1.vtx[52]"]
+    """
     unformatted = []
     for selection_item in selection_items:
         if ":" not in selection_item:
@@ -74,22 +83,15 @@ def unpack_selection_items(selection_items):
                 formatted.append(j)
     return formatted
 
-def string_to_component(string_component):
-    pos = get_position(string_component)
-    return Component(string_component, *pos)
-
-def clear():
-    cmds.select(all=True)
-    cmds.Delete()
-
 def cube_at_point(pos):
+    """Spawns a cube with the origin at a specified point"""
     o, n = cmds.polyCube()
     cmds.select(o)
     cmds.move(*pos, a=True, ws=True)
 
 def distance_between(pos1, pos2):
-    p1 = np.array(pos1)
-    p2 = np.array(pos2)
-    squared_dist = np.sum((p1-p2)**2, axis=0)
-    return np.sqrt(squared_dist)
-
+    """Returns distance between two points"""
+    difference = [i - j for i, j in zip(pos1, pos2)]
+    power = [i ** 2 for i in difference]
+    squared_dist = math.sum(power)
+    return math.sqrt(squared_dist)

@@ -93,5 +93,5 @@ def distance_between(pos1, pos2):
     """Returns distance between two points"""
     difference = [i - j for i, j in zip(pos1, pos2)]
     power = [i ** 2 for i in difference]
-    squared_dist = math.sum(power)
+    squared_dist = sum(power)
     return math.sqrt(squared_dist)

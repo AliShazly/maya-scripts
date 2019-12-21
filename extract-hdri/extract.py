@@ -40,6 +40,7 @@ def get_neighbors(idx, radius=1):
     return neighbors
 
 
+# TODO: speed this up
 def cluster_pixels(mask, min_cluster_size=300, min_neighbor_dist=20):
     visited = np.zeros_like(mask)
     rows, cols = mask.shape
@@ -99,7 +100,6 @@ def inverse_equirectangular(x, y, radius=5):
 
     return x, y, z
 
-# That ^^^ didn't work :(
 def fit_to_uv(mat_size, points):
     old_rows, old_cols = mat_size
     new_rows, new_cols = (max(mat_size),) * 2
@@ -118,6 +118,7 @@ def crop(image, bbox):
     x2, y2 = br
     return image[x1:x2, y1:y2]
 
+# TODO: Make this return a copy of the image instaed of modifying it 
 def fill(image, bbox, value=0):
     tl, _, br, _ = bbox
     x1, y1 = tl
@@ -131,13 +132,17 @@ def main(hdr_path):
     data = {}
     for idx, cluster in enumerate(clusters):
         pt1, pt2, pt3, pt4, mid = get_rect_points(cluster)
+
+        pt1_uv, pt2_uv, pt3_uv, pt4_uv, mid_uv = fit_to_uv(cluster.shape, [pt1, pt2, pt3, pt4, mid])
+        
         cropped = crop(hdr, [pt1, pt2, pt3, pt4])
+        
         path = f"{os.getcwd()}\\rect_tex_{idx}.hdr"
         cv2.imwrite(path, cropped)
 
         data[str(idx)] = {
-                "bbox_points": [pt1, pt2, pt3, pt4],
-                "mid_point": mid,
+                "bbox_points": [pt1_uv, pt2_uv, pt3_uv, pt4_uv],
+                "mid_point": mid_uv,
                 "rect_tex": path
                 }
 
@@ -146,8 +151,9 @@ def main(hdr_path):
     path = f"{os.getcwd()}\\patched_hdr.hdr"
     cv2.imwrite(path, hdr)
     data["hdr"] = path
+    data["num_lights"] = len(clusters)
 
     with open("extract-hdri.json", "w+") as f:
         json.dump(data, f)
 
-main()
+main("hdr.hdr")

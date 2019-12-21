@@ -1,3 +1,6 @@
 extract-hdri/.mayaSwatches/
 extract-hdri/.vrayThumbs/
-extract-hdri/*.hdr
+*.hdr
+*.tx
+*.ma
+*.mb
